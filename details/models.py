@@ -1,9 +1,10 @@
 from django.db import models
+from userauth.models import *
 
 
 # 1️⃣ Player Model (Leaderboard)
 class Player(models.Model):
-    name = models.CharField(max_length=200)
+    player = models.ForeignKey(User,on_delete=models.CASCADE, related_name='player_model', null=True, blank=True)
     short_name = models.CharField(max_length=50)
 
     points = models.IntegerField(default=0)
@@ -26,7 +27,7 @@ class Player(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return self.player.name
 
 
 # 2️⃣ Match Model (Schedule / Results)
@@ -75,13 +76,3 @@ class News(models.Model):
         return self.title
 
 
-# 4️⃣ Player Registration Model
-class PlayerRegistration(models.Model):
-    name = models.CharField(max_length=200)
-    email = models.EmailField(unique=True)
-    image = models.URLField(blank=True, null=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
