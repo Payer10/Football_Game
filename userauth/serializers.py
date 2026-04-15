@@ -6,7 +6,7 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'image', 'password']
+        fields = ['id', 'name', 'email', 'image', 'password','jersey', 'position', 'tags']
         read_only_fields = ['id', 'image']
 
     def create(self, validated_data):
@@ -15,3 +15,10 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class UserSerializerCURD(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'image', 'jersey', 'position', 'tags']
+        read_only_fields = ['id']

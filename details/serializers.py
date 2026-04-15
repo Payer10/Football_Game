@@ -1,11 +1,11 @@
-from .models import Player, Match, News
+from .models import PlayerWeekdetails, Match, News
 from rest_framework import serializers
 
 
 class PlayerRankingSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Player
-        fields = ['id', 'short_name', 'points', 'goals', 'matches', 'wins', 'losses', 'draws', 'goals_for', 'goals_against', 'rank', 'hattricks', 'clean_sheets', 'form_average']   
+        model = PlayerWeekdetails
+        fields = ['id', 'matches', 'wins', 'losses', 'draws', 'goal', 'goal_canceled', 'hattricks', 'clean_sheets']   
         # read_only_fields = ['id', 'short_name', 'points', 'goals', 'matches', 'wins', 'losses', 'draws', 'goals_for', 'goals_against', 'rank', 'hattricks', 'clean_sheets', 'form_average']
 
 

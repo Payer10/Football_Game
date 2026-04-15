@@ -2,29 +2,47 @@ from django.db import models
 from userauth.models import *
 
 
-# 1️⃣ Player Model (Leaderboard)
-class Player(models.Model):
-    player = models.ForeignKey(User,on_delete=models.CASCADE, related_name='player_model', null=True, blank=True)
-    short_name = models.CharField(max_length=50)
 
-    points = models.IntegerField(default=0)
-    goals = models.IntegerField(default=0)
+# player season
+class Season(models.Model):
+    player = models.ForeignKey(User,on_delete=models.CASCADE, related_name='season_model', null=True, blank=True)
+    season_year = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+# player season month
+class Month(models.Model):
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name='months')
+    month_name = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+# 1️⃣ Player Model (Leaderboard)
+class PlayerWeekdetails(models.Model):
+    month = models.ForeignKey(Month, on_delete=models.CASCADE, related_name='player_weekdetails')
+    # short_name = models.CharField(max_length=50)
+
+    # points = models.IntegerField(default=0)
+    goal = models.IntegerField(default=0)
     matches = models.IntegerField(default=0)
 
     wins = models.IntegerField(default=0)
     losses = models.IntegerField(default=0)
     draws = models.IntegerField(default=0)
 
-    goals_for = models.IntegerField(default=0)
-    goals_against = models.IntegerField(default=0)
+    # goal = models.IntegerField(default=0)
+    goal_canceled = models.IntegerField(default=0)
 
-    rank = models.IntegerField(default=0)
+    # rank = models.IntegerField(default=0)
     hattricks = models.IntegerField(default=0)
     clean_sheets = models.IntegerField(default=0)
 
-    form_average = models.FloatField(default=0)
+    # form_average = models.FloatField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.short_name
@@ -54,6 +72,7 @@ class Match(models.Model):
     result_label = models.CharField(max_length=50, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         return f"{self.team1} vs {self.team2}"

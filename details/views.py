@@ -1,4 +1,4 @@
-from .models import Player, Match, News
+from .models import PlayerWeekdetails, Match, News
 
 from .serializers import PlayerRankingSerializer, MatchSerializer, NewsSerializer
 from rest_framework.views import APIView
@@ -11,7 +11,7 @@ class PlayerRankingView(APIView):
 
     permission_classes = [AllowAny and IsAuthenticated]
     def get(self, request):
-        players = Player.objects.all().order_by('-points', '-goals', 'matches')
+        players = PlayerWeekdetails.objects.all().order_by('-points', '-goals', 'matches')
         serializer = PlayerRankingSerializer(players, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -37,8 +37,8 @@ class PlayerRankingView(APIView):
         data = request.data
         pk = data.get('id')
         try:
-            player = Player.objects.get(pk=pk)
-        except Player.DoesNotExist:
+            player = PlayerWeekdetails.objects.get(pk=pk)
+        except PlayerWeekdetails.DoesNotExist:
             return Response({"detail": "Player not found."}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = PlayerRankingSerializer(player, data=request.data, partial=True)
@@ -58,8 +58,8 @@ class PlayerRankingView(APIView):
         data = request.data
         pk = data.get('id')
         try:
-            player = Player.objects.get(pk=pk)
-        except Player.DoesNotExist:
+            player = PlayerWeekdetails.objects.get(pk=pk)
+        except PlayerWeekdetails.DoesNotExist:
             return Response({"detail": "Player not found."}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = PlayerRankingSerializer(player, data=request.data, partial=True)
@@ -78,8 +78,8 @@ class PlayerRankingView(APIView):
         data = request.data
         pk = data.get('id')
         try:
-            player = Player.objects.get(pk=pk)
-        except Player.DoesNotExist:
+            player = PlayerWeekdetails.objects.get(pk=pk)
+        except PlayerWeekdetails.DoesNotExist:
             return Response({"detail": "Player not found."}, status=status.HTTP_404_NOT_FOUND)
 
         player.delete()

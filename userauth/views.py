@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import User
-from .serializers import UserSerializer
+from .serializers import UserSerializer, UserSerializerCURD
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -49,3 +50,9 @@ class LoginView(APIView):
 
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=404)
+        
+
+
+class UserDetailView(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializerCURD
