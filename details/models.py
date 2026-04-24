@@ -39,7 +39,7 @@ class PlayerWeekdetails(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.short_name
+        return self.week_name
 
 
 # 2️⃣ Match Model (Schedule / Results)
@@ -66,8 +66,8 @@ class PlayerMatch(models.Model):
 
 # 3️⃣ Match Model (Schedule / Results)
 class Match(models.Model):
-    player = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    match = models.ForeignKey(PlayerMatch, on_delete=models.CASCADE, null=True)
+    player = models.ForeignKey(User, on_delete=models.CASCADE,related_name='match_player', null=True)
+    match = models.ForeignKey(PlayerMatch, on_delete=models.CASCADE,related_name='match_add', null=True)
     date = models.DateField(null=True)
     goals = models.IntegerField(default=0)
     goal_cancel = models.IntegerField(default=0)
@@ -77,7 +77,7 @@ class Match(models.Model):
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
-        return f"{self.team1} vs {self.team2}"
+        return f'{self.date}'
     
 
 
