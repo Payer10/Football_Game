@@ -23,7 +23,7 @@ class Month(models.Model):
         return self.month_name
 
 
-# 1️⃣ Player Model (Leaderboard)
+# Player Model (Leaderboard)
 class PlayerWeekdetails(models.Model):
     month = models.ForeignKey(Month, on_delete=models.CASCADE, related_name='months')
     week_name = models.CharField(max_length=50, unique=True, null=True)
@@ -42,7 +42,7 @@ class PlayerWeekdetails(models.Model):
         return self.week_name
 
 
-# 2️⃣ Match Model (Schedule / Results)
+# Match Model (Schedule / Results)
     
 class PlayerMatch(models.Model):
     STATUS_CHOICES = [
@@ -64,7 +64,7 @@ class PlayerMatch(models.Model):
 
 
 
-# 3️⃣ Match Model (Schedule / Results)
+# Match Model (Schedule / Results)
 class Match(models.Model):
     player = models.ForeignKey(User, on_delete=models.CASCADE,related_name='match_player', null=True)
     match = models.ForeignKey(PlayerMatch, on_delete=models.CASCADE,related_name='match_add', null=True)
@@ -82,7 +82,7 @@ class Match(models.Model):
 
 
 
-# 4 News Model
+# News Model
 class News(models.Model):
     CHOICE_CATEGORY =  [
         ("General", "General"),
