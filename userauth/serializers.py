@@ -149,4 +149,4 @@ class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email', 'username', 'is_active', 'is_verified', 'role', 'created_at']
-        read_only_fields = ['id', 'email', 'created_at']
+        read_only_fields = ['id', 'email', 'created_at', 'is_active', 'is_verified', 'role']
