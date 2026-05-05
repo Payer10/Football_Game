@@ -141,3 +141,12 @@ class SignOutSerializer(serializers.Serializer):
 # -----------refresh token serializer----------
 class RefreshTokenSerializer(serializers.Serializer):
     user_id = serializers.UUIDField()
+
+
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'username', 'is_active', 'is_verified', 'role', 'created_at']
+        read_only_fields = ['id', 'email', 'created_at']

@@ -14,7 +14,7 @@
 
 
 from django.urls import path
-from .views import RefreshTokenView, SignOutView, SignupView, ResendVerification, VerifyEmailView, SignInViwe, ForgotPasswordView, VerificationResetCodeView, ResetPasswordView
+from .views import RefreshTokenView, SignOutView, SignupView, ResendVerification, VerifyEmailView, SignInViwe, ForgotPasswordView, VerificationResetCodeView, ResetPasswordView, UserDetailView
 
 urlpatterns = [
     path('signup/', SignupView.as_view(), name='signup'),
@@ -26,4 +26,5 @@ urlpatterns = [
     path('forgot-email-verify/', VerificationResetCodeView.as_view(), name='verify-forgot'),
     path('reset-password/', ResetPasswordView.as_view(), name="reset_password"),
     path('refresh-token/', RefreshTokenView.as_view(), name='refresh_token'),
+    path('user-detail/', UserDetailView.as_view(), name='user-detail'),
 ]

@@ -74,6 +74,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils.timezone import now
 import uuid
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+from rest_framework.permissions import IsAuthenticated
 
 
 # ----------sign up view----------
@@ -319,3 +320,18 @@ class RefreshTokenView(GenericAPIView):
             'access_token': str(refresh.access_token),
             'access_token_valid_till': int((now()+refresh.access_token.lifetime).timestamp()*1000)
         })
+    
+
+
+
+class UserDetailView(GenericAPIView):
+    serializer_class = UserDetailSerializer
+    permission_classes = [IsAuthenticated]  # Add appropriate permissions
+
+    def get(self, request, user_id):
+        user = User.objects.filter(id=user_id).first()
+        if not user:
+            return Response({'error': 'User not found'}, status=404)
+        
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
