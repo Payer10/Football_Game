@@ -26,5 +26,5 @@ urlpatterns = [
     path('forgot-email-verify/', VerificationResetCodeView.as_view(), name='verify-forgot'),
     path('reset-password/', ResetPasswordView.as_view(), name="reset_password"),
     path('refresh-token/', RefreshTokenView.as_view(), name='refresh_token'),
-    path('user-detail/', UserDetailView.as_view(), name='user-detail'),
+    path('user-detail/<uuid:user_id>/', UserDetailView.as_view(), name='user-detail'),
 ]
