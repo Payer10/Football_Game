@@ -22,15 +22,15 @@ from .views import (
 )
 
 urlpatterns = [
-    path('signup/', SignupView.as_view(), name='signup'),
-    path('resend-verification/', ResendVerification.as_view(), name='resend_verification'),
-    path('verify-email/', VerifyEmailView.as_view(), name='verify-email'),
-    path('signin/', SignInViwe.as_view(), name="user-signin"),
-    path('signout/', SignOutView.as_view(), name="user-signout"),
-    path('forgot-email/', ForgotPasswordView.as_view(), name='forgot-password'),
-    path('forgot-email-verify/', VerificationResetCodeView.as_view(), name='verify-forgot'),
-    path('reset-password/', ResetPasswordView.as_view(), name="reset_password"),
-    path('refresh-token/', RefreshTokenView.as_view(), name='refresh_token'),
+    path('user/signup/', SignupView.as_view(), name='signup'),
+    path('user/resend-verification/', ResendVerification.as_view(), name='resend_verification'),
+    path('user/verify-email/', VerifyEmailView.as_view(), name='verify-email'),
+    path('user/signin/', SignInViwe.as_view(), name="user-signin"),
+    path('user/signout/', SignOutView.as_view(), name="user-signout"),
+    path('user/forgot-email/', ForgotPasswordView.as_view(), name='forgot-password'),
+    path('user/forgot-email-verify/', VerificationResetCodeView.as_view(), name='verify-forgot'),
+    path('user/reset-password/', ResetPasswordView.as_view(), name="reset_password"),
+    path('user/refresh-token/', RefreshTokenView.as_view(), name='refresh_token'),
     path('user-detail/<uuid:user_id>/', UserDetailView.as_view(), name='user-detail'),
 
     # Admin Auth URLs
@@ -40,5 +40,5 @@ urlpatterns = [
     path('admin/forgot-email-verify/', AdminVerificationResetCodeView.as_view(), name='admin-verify-forgot'),
     path('admin/reset-password/', AdminResetPasswordView.as_view(), name="admin-reset_password"),
     path('admin/refresh-token/', AdminRefreshTokenView.as_view(), name='admin-refresh_token'),
-    path('admin/user-detail/<uuid:user_id>/', AdminUserDetailView.as_view(), name='admin-user-detail'),
+    path('admin/admin-detail/<uuid:user_id>/', AdminUserDetailView.as_view(), name='admin-user-detail'),
 ]
