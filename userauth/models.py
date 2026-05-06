@@ -22,9 +22,35 @@
 
 
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin, AbstractUser
+from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin, AbstractUser, BaseUserManager
 from django.utils import timezone
 import uuid
+
+
+
+
+# user manager create for create user and superuser
+class UserManager(BaseUserManager):
+    def create_user(self, email, username, password=None, **extra_fields):
+        if not email:
+            raise ValueError("Email must be provided")
+        email = self.normalize_email(email)
+        user = self.model(email=email, username=username, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, username, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)  # admin auto active
+        extra_fields.setdefault('is_verified', True)
+        extra_fields.setdefault('role', 'admin')
+
+        return self.create_user(email, username, password, **extra_fields)
+
+
+
 
 
 # -----------custom user model----------
@@ -46,6 +72,7 @@ class User(AbstractUser):
     created_at = models.DateTimeField(default=timezone.now)
 
 
+    objects = UserManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 

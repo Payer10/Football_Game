@@ -150,3 +150,27 @@ class UserDetailSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'username', 'is_active', 'is_verified', 'role', 'created_at']
         read_only_fields = ['email', 'created_at', 'is_active', 'is_verified', 'role']
+
+# -----------admin sign in serializer----------
+class AdminSignInSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=False)
+    username = serializers.CharField(required=False)
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = None
+        if data.get('email'):
+            user = User.objects.filter(email=data['email']).first()
+        if data.get('username'):
+            user = User.objects.filter(username=data['username']).first()
+
+        if not user or not user.check_password(data['password']):
+            raise serializers.ValidationError("Invalid credentials")
+        
+        if not user.is_verified:
+            raise serializers.ValidationError("User is not verified")
+            
+        if user.role != 'admin':
+            raise serializers.ValidationError("Only admins are allowed to sign in here")
+        
+        return user
