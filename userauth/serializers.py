@@ -54,35 +54,27 @@ from .models import User
 # -----------sign up serializer----------
 class SignUpSerializer(serializers.ModelSerializer):
 
-    password1 = serializers.CharField(write_only=True)
-    password2 = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
         fields = [
             'email',
             'username',
-            'is_terms_service',
-            'password1',
-            'password2',
+            'password',
         ]
-
-    def validate(self, attrs):
-        if attrs['password1'] != attrs['password2']:
-            raise serializers.ValidationError("Passwords do not match")
-
-        if not attrs.get('is_terms_service'):
-            raise serializers.ValidationError("You must agree to the terms of service")
-
-        return attrs
+        extra_kwargs = {
+            'username': {'required': False, 'allow_blank': True},
+        }
 
     def create(self, validated_data):
-        password = validated_data.pop('password1')
-        validated_data.pop('password2')
-
-        user = User.objects.create(**validated_data)
-        user.set_password(password)
-        user.save()
+        password = validated_data.pop('password')
+        username = validated_data.pop('username', None)
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            username=username,
+            password=password,
+        )
         return user
 
 
