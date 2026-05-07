@@ -64,7 +64,7 @@ class User(AbstractUser):
 
 
 
-    is_terms_service = models.BooleanField(default=False)
+    # is_terms_service = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
     role = models.CharField(max_length=50, default='user')
