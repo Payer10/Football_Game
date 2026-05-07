@@ -74,12 +74,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils.timezone import now
 import uuid
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 # ----------sign up view----------
 class SignupView(GenericAPIView):
     serializer_class = SignUpSerializer
+    authentication_classes = []
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -110,6 +112,8 @@ class SignupView(GenericAPIView):
 
 # ----------resend verification code view----------
 class ResendVerification(GenericAPIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
     def post(self, request):
         user = User.objects.filter(id=request.data.get('user_id')).first()
         if not user:
@@ -139,6 +143,8 @@ class ResendVerification(GenericAPIView):
 
 # ----------verify email view----------
 class VerifyEmailView(GenericAPIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
 
     def post(self, request):
         id = request.data.get('user_id')
@@ -176,6 +182,8 @@ class VerifyEmailView(GenericAPIView):
 # ----------sign in view----------
 class SignInViwe(GenericAPIView):
     serializer_class = SignInSerializer
+    authentication_classes = []
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -200,6 +208,8 @@ class SignInViwe(GenericAPIView):
 # ----------sign out view----------
 class SignOutView(GenericAPIView):
     serializer_class = SignOutSerializer
+    authentication_classes = []
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -221,6 +231,8 @@ class SignOutView(GenericAPIView):
 
 # ----------forgot password view----------
 class ForgotPasswordView(GenericAPIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
     
     def post(self, request):
         user = (User.objects.filter(email=request.data.get('email')).first() or
@@ -253,6 +265,8 @@ class ForgotPasswordView(GenericAPIView):
 
 # ----------verification reset code view----------
 class VerificationResetCodeView(GenericAPIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
 
     def post(self, request):
         user = User.objects.get(id=request.data.get('user_id'))
@@ -279,6 +293,8 @@ class VerificationResetCodeView(GenericAPIView):
 
 # ----------reset password view----------
 class ResetPasswordView(GenericAPIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
 
     def post(self, request):
         user = User.objects.get(id=request.data.get('user_id'))
@@ -302,6 +318,8 @@ class ResetPasswordView(GenericAPIView):
 # ---------------refresh token view----------
 class RefreshTokenView(GenericAPIView):
     serializer_class = RefreshTokenSerializer
+    authentication_classes = []
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -343,6 +361,8 @@ class UserDetailView(GenericAPIView):
 
 class AdminSignInView(GenericAPIView):
     serializer_class = AdminSignInSerializer
+    authentication_classes = []
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -366,6 +386,9 @@ class AdminSignOutView(SignOutView):
     pass
 
 class AdminForgotPasswordView(GenericAPIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
     def post(self, request):
         user = (User.objects.filter(email=request.data.get('email'), role='admin').first() or
                 User.objects.filter(phone_number=request.data.get('phone_number'), role='admin').first() or
@@ -393,6 +416,9 @@ class AdminForgotPasswordView(GenericAPIView):
         })
 
 class AdminVerificationResetCodeView(GenericAPIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
     def post(self, request):
         try:
             user = User.objects.get(id=request.data.get('user_id'), role='admin')
@@ -416,6 +442,9 @@ class AdminVerificationResetCodeView(GenericAPIView):
         })
 
 class AdminResetPasswordView(GenericAPIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
     def post(self, request):
         try:
             user = User.objects.get(id=request.data.get('user_id'), role='admin')
