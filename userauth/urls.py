@@ -22,16 +22,16 @@ from .views import (
 )
 
 urlpatterns = [
-    path('user/signup/', SignupView.as_view(), name='signup'),
-    path('user/resend-verification/', ResendVerification.as_view(), name='resend_verification'),
-    path('user/verify-email/', VerifyEmailView.as_view(), name='verify-email'),
-    path('user/signin/', SignInViwe.as_view(), name="user-signin"),
-    path('user/signout/', SignOutView.as_view(), name="user-signout"),
-    path('user/forgot-email/', ForgotPasswordView.as_view(), name='forgot-password'),
-    path('user/forgot-email-verify/', VerificationResetCodeView.as_view(), name='verify-forgot'),
-    path('user/reset-password/', ResetPasswordView.as_view(), name="reset_password"),
-    path('user/refresh-token/', RefreshTokenView.as_view(), name='refresh_token'),
-    path('user-detail/<uuid:user_id>/', UserDetailView.as_view(), name='user-detail'),
+    path('user/signup', SignupView.as_view(), name='signup'),
+    path('user/resend-verification', ResendVerification.as_view(), name='resend_verification'),
+    path('user/verify-email', VerifyEmailView.as_view(), name='verify-email'),
+    path('user/signin', SignInViwe.as_view(), name="user-signin"),
+    path('user/signout', SignOutView.as_view(), name="user-signout"),
+    path('user/forgot-email', ForgotPasswordView.as_view(), name='forgot-password'),
+    path('user/forgot-email-verify', VerificationResetCodeView.as_view(), name='verify-forgot'),
+    path('user/reset-password', ResetPasswordView.as_view(), name="reset_password"),
+    path('user/refresh-token', RefreshTokenView.as_view(), name='refresh_token'),
+    path('user-detail/<uuid:user_id>', UserDetailView.as_view(), name='user-detail'),
 
     # Admin Auth URLs
     path('admin/signin/', AdminSignInView.as_view(), name="admin-signin"),
