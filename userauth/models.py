@@ -31,13 +31,13 @@ import uuid
 
 # user manager create for create user and superuser
 class UserManager(BaseUserManager):
-    def create_user(self, email, username=None, password=None, **extra_fields):
+    def create_user(self, email, username=None, name='', password=None, **extra_fields):
         if not email:
             raise ValueError("Email must be provided")
         email = self.normalize_email(email)
         if not username:
             username = ''  # placeholder, will be set after save
-        user = self.model(email=email, username=username, **extra_fields)
+        user = self.model(email=email, username=username, name=name, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         if not user.username or user.username == '':
@@ -63,9 +63,8 @@ class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, unique=True, blank=True)
-    # phone_number = models.CharField(max_length=15)
-    # phone_country_code = models.CharField(max_length=5)
-    # full_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, blank=True, default='')
+    image = models.URLField(null=True, blank=True)
 
 
 

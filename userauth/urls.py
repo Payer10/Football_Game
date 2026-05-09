@@ -16,21 +16,27 @@
 from django.urls import path
 from .views import (
     RefreshTokenView, SignOutView, SignupView, ResendVerification, VerifyEmailView, 
-    SignInViwe, ForgotPasswordView, VerificationResetCodeView, ResetPasswordView, UserDetailView,
+    SignInViwe, ForgotPasswordView, ForgetPasswordVerifyView, ResetPasswordView,
+    UserDetailView, ProfileView, UpdateProfileView, AppConfigView,
     AdminSignInView, AdminSignOutView, AdminForgotPasswordView, AdminVerificationResetCodeView,
     AdminResetPasswordView, AdminRefreshTokenView, AdminUserDetailView
 )
 
 urlpatterns = [
-    path('user/signup', SignupView.as_view(), name='signup'),
-    path('user/resend-verification', ResendVerification.as_view(), name='resend_verification'),
+    # User Auth URLs
+    path('user/register', SignupView.as_view(), name='register'),
+    path('user/login', SignInViwe.as_view(), name='login'),
+    path('user/config', AppConfigView.as_view(), name='app-config'),
     path('user/verify-email', VerifyEmailView.as_view(), name='verify-email'),
-    path('user/signin', SignInViwe.as_view(), name="user-signin"),
-    path('user/signout', SignOutView.as_view(), name="user-signout"),
-    path('user/forgot-email', ForgotPasswordView.as_view(), name='forgot-password'),
-    path('user/forgot-email-verify', VerificationResetCodeView.as_view(), name='verify-forgot'),
-    path('user/reset-password', ResetPasswordView.as_view(), name="reset_password"),
-    path('user/refresh-token', RefreshTokenView.as_view(), name='refresh_token'),
+    path('user/forget-password', ForgotPasswordView.as_view(), name='forget-password'),
+    path('user/forget-password-verify', ForgetPasswordVerifyView.as_view(), name='forget-password-verify'),
+    path('user/profile', ProfileView.as_view(), name='user-profile'),
+    path('user/update-profile', UpdateProfileView.as_view(), name='update-profile'),
+    # Kept endpoints (not in new spec but still useful)
+    path('user/resend-verification', ResendVerification.as_view(), name='resend-verification'),
+    path('user/signout', SignOutView.as_view(), name='user-signout'),
+    path('user/reset-password', ResetPasswordView.as_view(), name='reset-password'),
+    path('user/refresh-token', RefreshTokenView.as_view(), name='refresh-token'),
     path('user-detail/<uuid:user_id>', UserDetailView.as_view(), name='user-detail'),
 
     # Admin Auth URLs

@@ -59,70 +59,47 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            'name',
             'email',
             'username',
             'password',
         ]
         extra_kwargs = {
             'username': {'required': False, 'allow_blank': True},
+            'name': {'required': True},
         }
 
     def create(self, validated_data):
         password = validated_data.pop('password')
         username = validated_data.pop('username', None)
+        name = validated_data.pop('name', '')
         user = User.objects.create_user(
             email=validated_data['email'],
             username=username,
+            name=name,
             password=password,
         )
         return user
 
 
-# -----------update username serializer----------
-class UpdateUserNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["username"]
-
-
-
-# -----------user profile serializer----------
-class ProfileImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['profile_picture']
-
-
-
 # -----------sign in serializer----------
 class SignInSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=False)
-    username = serializers.CharField(required=False)
+    email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True)
-    # phone_number = serializers.CharField(required=False)
-
-
-
 
     def validate(self, data):
-        user = None
-        if data.get('email'):
-            user = User.objects.filter(email=data['email']).first()
-        if data.get('username'):
-            user = User.objects.filter(username=data['username']).first()
+        user = User.objects.filter(email=data['email']).first()
 
         if not user or not user.check_password(data['password']):
-            raise serializers.ValidationError("Invalid credentials")
-        
+            raise serializers.ValidationError({"message": "invalid email or password"})
+
         if not user.is_verified:
-            raise serializers.ValidationError("User is not verified")
-        
-        # if data.get('phone_number'):
-        #     user = User.objects.filter(phone_number=data['phone_number']).first()
+            raise serializers.ValidationError({
+                "is_verified": False,
+                "message": "unverified"
+            })
 
-        
         return user
-
 
 
 # -----------sign out serializer----------
@@ -135,8 +112,40 @@ class RefreshTokenSerializer(serializers.Serializer):
     user_id = serializers.UUIDField()
 
 
+# -----------user profile serializer----------
+class UserProfileSerializer(serializers.ModelSerializer):
+    user_role = serializers.CharField(source='role', read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['name', 'email', 'image', 'username', 'user_role']
+        read_only_fields = ['name', 'email', 'image', 'username', 'user_role']
 
 
+# -----------update profile serializer----------
+class UpdateProfileSerializer(serializers.ModelSerializer):
+    user_role = serializers.CharField(source='role', read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['name', 'email', 'image', 'username', 'user_role']
+        read_only_fields = ['user_role']
+        extra_kwargs = {
+            'name': {'required': False},
+            'email': {'required': False},
+            'image': {'required': False},
+            'username': {'required': False},
+        }
+
+    def update(self, instance, validated_data):
+        for field, value in validated_data.items():
+            if value is not None:
+                setattr(instance, field, value)
+        instance.save()
+        return instance
+
+
+# -----------user detail serializer----------
 class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
