@@ -96,21 +96,6 @@ class SignInSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True)
 
-    def validate(self, data):
-        user = User.objects.filter(email=data['email']).first()
-
-        if not user or not user.check_password(data['password']):
-            raise serializers.ValidationError({"message": "invalid email or password"})
-
-        if not user.is_verified:
-            raise serializers.ValidationError({
-                "message": "email is not verified",
-                "user_id": str(user.id),
-                "is_verified": False
-            })
-
-        return user
-
 
 # -----------sign out serializer----------
 class SignOutSerializer(serializers.Serializer):
@@ -177,21 +162,3 @@ class AdminSignInSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
     username = serializers.CharField(required=False)
     password = serializers.CharField(write_only=True)
-
-    def validate(self, data):
-        user = None
-        if data.get('email'):
-            user = User.objects.filter(email=data['email']).first()
-        if data.get('username'):
-            user = User.objects.filter(username=data['username']).first()
-
-        if not user or not user.check_password(data['password']):
-            raise serializers.ValidationError({"message": "invalid credentials"})
-        
-        if not user.is_verified:
-            raise serializers.ValidationError({"message": "user is not verified"})
-            
-        if user.role != 'admin':
-            raise serializers.ValidationError({"message": "only admins are allowed to sign in here"})
-        
-        return user

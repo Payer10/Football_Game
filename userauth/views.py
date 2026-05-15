@@ -232,7 +232,16 @@ class SignInViwe(GenericAPIView):
         if not serializer.is_valid():
             return Response(format_serializer_errors(serializer.errors), status=400)
 
-        user = serializer.validated_data
+        email = serializer.validated_data['email']
+        password = serializer.validated_data['password']
+
+        user = User.objects.filter(email=email).first()
+
+        if not user or not user.check_password(password):
+            return Response({'message': 'invalid email or password'}, status=400)
+
+        if not user.is_verified:
+            return Response({'message': 'email is not verified', 'user_id': str(user.id)}, status=403)
 
         refresh = RefreshToken.for_user(user)
         return Response({
@@ -455,7 +464,21 @@ class AdminSignInView(GenericAPIView):
         if not serializer.is_valid():
             return Response(format_serializer_errors(serializer.errors), status=400)
 
-        user = serializer.validated_data
+        data = serializer.validated_data
+        user = None
+        if data.get('email'):
+            user = User.objects.filter(email=data['email']).first()
+        if not user and data.get('username'):
+            user = User.objects.filter(username=data['username']).first()
+
+        if not user or not user.check_password(data['password']):
+            return Response({'message': 'invalid credentials'}, status=400)
+
+        if not user.is_verified:
+            return Response({'message': 'user is not verified'}, status=403)
+
+        if user.role != 'admin':
+            return Response({'message': 'only admins are allowed to sign in here'}, status=403)
 
         refresh = RefreshToken.for_user(user)
         return Response({
