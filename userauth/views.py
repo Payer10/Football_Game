@@ -27,6 +27,7 @@
 #         return Response(serializer.errors, status=400)
     
 
+
     
 
 # class LoginView(APIView):
@@ -61,7 +62,6 @@
 
 
 
-
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -81,6 +81,33 @@ from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, Bl
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
+def format_serializer_errors(errors):
+    """
+    Convert DRF serializer errors into a clean {'message': '...'} format.
+    Takes the first error message from the first field that has an error.
+    """
+    # If the error already has 'message' key, return it as-is
+    if 'message' in errors:
+        return errors
+
+    # Handle non_field_errors
+    if 'non_field_errors' in errors:
+        msgs = errors['non_field_errors']
+        if msgs:
+            first = msgs[0]
+            if isinstance(first, dict):
+                return first
+            return {'message': str(first)}
+
+    # Handle field-level errors: return first field's first error
+    for field, messages in errors.items():
+        if messages:
+            first_msg = messages[0] if isinstance(messages, list) else messages
+            return {'message': str(first_msg)}
+
+    return {'message': 'invalid request'}
+
+
 # ----------sign up view----------
 class SignupView(GenericAPIView):
     serializer_class = SignUpSerializer
@@ -89,7 +116,9 @@ class SignupView(GenericAPIView):
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(format_serializer_errors(serializer.errors), status=400)
+
         user = serializer.save()
 
         otp = generate_verification_code()
@@ -131,7 +160,7 @@ class ResendVerification(GenericAPIView):
     def post(self, request):
         user = User.objects.filter(id=request.data.get('user_id')).first()
         if not user:
-            return Response({"message": "User not found"}, status=404)
+            return Response({"message": "user not found"}, status=404)
         
         otp = generate_verification_code()
 
@@ -161,7 +190,7 @@ class VerifyEmailView(GenericAPIView):
         otp_code = request.data.get('otp')
 
         if not email or not otp_code:
-            return Response({'message': 'invalid email or otp'}, status=400)
+            return Response({'message': 'email and otp are required'}, status=400)
 
         user = User.objects.filter(email=email).first()
         if not user:
@@ -201,20 +230,7 @@ class SignInViwe(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
-            # Extract the custom error message from serializer errors
-            errors = serializer.errors
-            if 'non_field_errors' in errors:
-                for err in errors['non_field_errors']:
-                    # Check if it's our custom dict error
-                    if isinstance(err, dict):
-                        return Response(err, status=400)
-                    try:
-                        import json
-                        err_dict = json.loads(str(err).replace("'", '"'))
-                        return Response(err_dict, status=400)
-                    except:
-                        pass
-            return Response({"message": "invalid email or password"}, status=400)
+            return Response(format_serializer_errors(serializer.errors), status=400)
 
         user = serializer.validated_data
 
@@ -237,19 +253,20 @@ class SignOutView(GenericAPIView):
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(format_serializer_errors(serializer.errors), status=400)
 
         user_id = serializer.validated_data['user_id']
 
         tokens = OutstandingToken.objects.filter(user_id=user_id)
 
         if not tokens.exists():
-            return Response({'error': 'No active session found'}, status=404)
+            return Response({'message': 'no active session found'}, status=404)
 
         for token in tokens:
             BlacklistedToken.objects.get_or_create(token=token)
 
-        return Response({'message': 'Successfully signed out'}, status=204)
+        return Response({'message': 'successfully signed out'}, status=204)
 
 
 
@@ -261,11 +278,11 @@ class ForgotPasswordView(GenericAPIView):
     def post(self, request):
         email = request.data.get('email')
         if not email:
-            return Response({'message': 'invalid email or otp'}, status=400)
+            return Response({'message': 'email is required'}, status=400)
 
         user = User.objects.filter(email=email).first()
         if not user:
-            return Response({'message': 'invalid email or otp'}, status=400)
+            return Response({'message': 'user not found with this email'}, status=404)
         
         otp = generate_verification_code()
         send_mail(
@@ -297,7 +314,7 @@ class ForgetPasswordVerifyView(GenericAPIView):
         otp_code = request.data.get('otp')
 
         if not email or not otp_code:
-            return Response({'message': 'invalid email or otp'}, status=400)
+            return Response({'message': 'email and otp are required'}, status=400)
 
         user = User.objects.filter(email=email).first()
         if not user:
@@ -332,21 +349,30 @@ class ResetPasswordView(GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        user = User.objects.get(id=request.data.get('user_id'))
+        user_id = request.data.get('user_id')
+        secret_key = request.data.get('secret_key')
+        password = request.data.get('password')
+
+        if not user_id or not secret_key or not password:
+            return Response({'message': 'user_id, secret_key and password are required'}, status=400)
+
+        user = User.objects.filter(id=user_id).first()
+        if not user:
+            return Response({'message': 'user not found'}, status=404)
         
         otp = VarificationCode.objects.filter(
-            user = user,
-            purpose = 'password_reset',
-            secret_key = request.data.get('secret_key')
+            user=user,
+            purpose='password_reset',
+            secret_key=secret_key
         ).last()
 
         if not otp:
-            return Response({'error': 'Invalid secret_key'})
-        user.set_password(request.data.get('password'))
+            return Response({'message': 'invalid secret_key'}, status=400)
+        user.set_password(password)
         user.save()
-        otp.delete
+        otp.delete()
 
-        return Response({'message': 'success your reset password'},status=202)
+        return Response({'message': 'password reset successfully'}, status=202)
     
 
 
@@ -358,14 +384,15 @@ class RefreshTokenView(GenericAPIView):
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(format_serializer_errors(serializer.errors), status=400)
 
         user_id = serializer.validated_data['user_id']
 
         token = OutstandingToken.objects.filter(user_id=user_id).order_by('-created_at').first()
 
         if not token:
-            return Response({'error': 'No active refresh token found'}, status=404)
+            return Response({'message': 'no active refresh token found'}, status=404)
 
         refresh = RefreshToken(token.token)
 
@@ -394,7 +421,8 @@ class UpdateProfileView(GenericAPIView):
     def post(self, request):
         user = request.user
         serializer = self.get_serializer(user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(format_serializer_errors(serializer.errors), status=400)
         serializer.save()
         return Response(serializer.data)
 
@@ -407,7 +435,7 @@ class UserDetailView(GenericAPIView):
     def get(self, request, user_id):
         user = User.objects.filter(id=user_id).first()
         if not user:
-            return Response({'message': 'User not found'}, status=404)
+            return Response({'message': 'user not found'}, status=404)
         
         serializer = self.get_serializer(user)
         return Response(serializer.data)
@@ -425,10 +453,8 @@ class AdminSignInView(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
-            print(serializer.errors)
-            return Response(serializer.errors, status=400)
+            return Response(format_serializer_errors(serializer.errors), status=400)
 
-        serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
 
         refresh = RefreshToken.for_user(user)
@@ -452,7 +478,7 @@ class AdminForgotPasswordView(GenericAPIView):
                 User.objects.filter(phone_number=request.data.get('phone_number'), role='admin').first() or
                 User.objects.filter(username=request.data.get('username'), role='admin').first())
         if not user:
-            return Response({'error': 'Invalid admin user details'}, status=404)
+            return Response({'message': 'admin user not found'}, status=404)
         
         otp = generate_verification_code()
         send_mail(
@@ -481,7 +507,7 @@ class AdminVerificationResetCodeView(GenericAPIView):
         try:
             user = User.objects.get(id=request.data.get('user_id'), role='admin')
         except User.DoesNotExist:
-            return Response({'error': 'Invalid admin user_id'}, status=404)
+            return Response({'message': 'admin user not found'}, status=404)
 
         otp = VarificationCode.objects.filter(
             user=user,
@@ -490,7 +516,7 @@ class AdminVerificationResetCodeView(GenericAPIView):
             expired_at__gte=now()
         ).last()
         if not otp:
-            return Response({'error': 'Invalid or expired code'}, status=404)
+            return Response({'message': 'invalid or expired code'}, status=400)
             
         otp.secret_key = uuid.uuid4()
         otp.save()
@@ -507,7 +533,7 @@ class AdminResetPasswordView(GenericAPIView):
         try:
             user = User.objects.get(id=request.data.get('user_id'), role='admin')
         except User.DoesNotExist:
-            return Response({'error': 'Invalid admin user_id'}, status=404)
+            return Response({'message': 'admin user not found'}, status=404)
         
         otp = VarificationCode.objects.filter(
             user = user,
@@ -516,13 +542,13 @@ class AdminResetPasswordView(GenericAPIView):
         ).last()
 
         if not otp:
-            return Response({'error': 'Invalid secret_key'}, status=400)
+            return Response({'message': 'invalid secret_key'}, status=400)
             
         user.set_password(request.data.get('password'))
         user.save()
         otp.delete()
 
-        return Response({'message': 'success your reset password'}, status=202)
+        return Response({'message': 'password reset successfully'}, status=202)
 
 class AdminRefreshTokenView(RefreshTokenView):
     pass
@@ -531,7 +557,7 @@ class AdminUserDetailView(UserDetailView):
     def get(self, request, user_id):
         user = User.objects.filter(id=user_id, role='admin').first()
         if not user:
-            return Response({'error': 'Admin User not found'}, status=404)
+            return Response({'message': 'admin user not found'}, status=404)
         
         serializer = self.get_serializer(user)
         return Response(serializer.data)

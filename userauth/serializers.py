@@ -47,7 +47,6 @@
 
 
 
-
 from rest_framework import serializers
 from .models import User
 
@@ -68,6 +67,16 @@ class SignUpSerializer(serializers.ModelSerializer):
             'username': {'required': False, 'allow_blank': True},
             'name': {'required': True},
         }
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("email already exists")
+        return value
+
+    def validate_username(self, value):
+        if value and User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("username already exists")
+        return value
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -95,8 +104,9 @@ class SignInSerializer(serializers.Serializer):
 
         if not user.is_verified:
             raise serializers.ValidationError({
-                "is_verified": False,
-                "message": "unverified"
+                "message": "email is not verified",
+                "user_id": str(user.id),
+                "is_verified": False
             })
 
         return user
@@ -137,6 +147,16 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
             'username': {'required': False},
         }
 
+    def validate_email(self, value):
+        if self.instance and User.objects.filter(email=value).exclude(id=self.instance.id).exists():
+            raise serializers.ValidationError("email already exists")
+        return value
+
+    def validate_username(self, value):
+        if self.instance and User.objects.filter(username=value).exclude(id=self.instance.id).exists():
+            raise serializers.ValidationError("username already exists")
+        return value
+
     def update(self, instance, validated_data):
         for field, value in validated_data.items():
             if value is not None:
@@ -166,12 +186,12 @@ class AdminSignInSerializer(serializers.Serializer):
             user = User.objects.filter(username=data['username']).first()
 
         if not user or not user.check_password(data['password']):
-            raise serializers.ValidationError("Invalid credentials")
+            raise serializers.ValidationError({"message": "invalid credentials"})
         
         if not user.is_verified:
-            raise serializers.ValidationError("User is not verified")
+            raise serializers.ValidationError({"message": "user is not verified"})
             
         if user.role != 'admin':
-            raise serializers.ValidationError("Only admins are allowed to sign in here")
+            raise serializers.ValidationError({"message": "only admins are allowed to sign in here"})
         
         return user
