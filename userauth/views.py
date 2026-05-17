@@ -282,7 +282,7 @@ class SignOutView(GenericAPIView):
         for token in tokens:
             BlacklistedToken.objects.get_or_create(token=token)
 
-        return Response({'message': 'successfully signed out'}, status=204)
+        return Response({'message': 'successfully signed out'}, status=200)
 
 
 
