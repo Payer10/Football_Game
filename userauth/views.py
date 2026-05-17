@@ -269,18 +269,12 @@ class SignInViwe(GenericAPIView):
 
 # ----------sign out view----------
 class SignOutView(GenericAPIView):
-    serializer_class = SignOutSerializer
-    authentication_classes = []
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(format_serializer_errors(serializer.errors), status=400)
+        user = request.user
 
-        user_id = serializer.validated_data['user_id']
-
-        tokens = OutstandingToken.objects.filter(user_id=user_id)
+        tokens = OutstandingToken.objects.filter(user_id=user.id)
 
         if not tokens.exists():
             return Response({'message': 'no active session found'}, status=404)
