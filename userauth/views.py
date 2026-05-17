@@ -334,9 +334,10 @@ class ForgetPasswordVerifyView(GenericAPIView):
     def post(self, request):
         email = request.data.get('email')
         otp_code = request.data.get('otp')
+        reset_password = request.data.get('reset_password')
 
-        if not email or not otp_code:
-            return Response({'message': 'email and otp are required'}, status=400)
+        if not email or not otp_code or not reset_password:
+            return Response({'message': 'email, otp and reset_password are required'}, status=400)
 
         user = User.objects.filter(email=email).first()
         if not user:
@@ -352,7 +353,10 @@ class ForgetPasswordVerifyView(GenericAPIView):
         if not otp:
             return Response({'message': 'invalid email or otp'}, status=400)
 
+        user.set_password(reset_password)
+        user.save()
         otp.delete()
+
         refresh = RefreshToken.for_user(user)
         return Response({
             'access_token': str(refresh.access_token),
