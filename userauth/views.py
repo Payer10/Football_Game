@@ -241,6 +241,19 @@ class SignInViwe(GenericAPIView):
             return Response({'message': 'invalid email or password'}, status=400)
 
         if not user.is_verified:
+            otp = generate_verification_code()
+            send_mail(
+                subject='Email Verification Code',
+                message=f'{otp} is your verification code',
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[user.email]
+            )
+            VarificationCode.objects.create(
+                user=user,
+                code=otp,
+                purpose='email_verification',
+                expired_at=get_expiration_time()
+            )
             return Response({'message': 'email is not verified', 'user_id': str(user.id)}, status=403)
 
         refresh = RefreshToken.for_user(user)
