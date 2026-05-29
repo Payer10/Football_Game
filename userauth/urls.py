@@ -19,7 +19,8 @@ from .views import (
     SignInViwe, ForgotPasswordView, ForgetPasswordVerifyView, ResetPasswordView,
     UserDetailView, ProfileView, UpdateProfileView, AppConfigView,
     AdminSignInView, AdminSignOutView, AdminForgotPasswordView, AdminVerificationResetCodeView,
-    AdminResetPasswordView, AdminRefreshTokenView, AdminUserDetailView
+    AdminResetPasswordView, AdminRefreshTokenView, AdminUserDetailView,
+    AdminBusinessSetupView, AdminBusinessSetupUpdateView
 )
 
 urlpatterns = [
@@ -47,4 +48,6 @@ urlpatterns = [
     path('admin/reset-password/', AdminResetPasswordView.as_view(), name="admin-reset_password"),
     path('admin/refresh-token/', AdminRefreshTokenView.as_view(), name='admin-refresh_token'),
     path('admin/admin-detail/<uuid:user_id>/', AdminUserDetailView.as_view(), name='admin-user-detail'),
+    path('admin/business-setup/', AdminBusinessSetupView.as_view(), name='admin-business-setup'),
+    path('admin/business-setup-update/', AdminBusinessSetupUpdateView.as_view(), name='admin-business-setup-update'),
 ]

@@ -68,9 +68,9 @@ from rest_framework import status
 from .serializers import (
     SignUpSerializer, SignInSerializer, SignOutSerializer, RefreshTokenSerializer,
     UserProfileSerializer, UpdateProfileSerializer, UserDetailSerializer,
-    AdminSignInSerializer,
+    AdminSignInSerializer, AppConfigSerializer,
 )
-from .models import User, VarificationCode
+from .models import User, VarificationCode, AppConfig
 from .utils import generate_verification_code, get_expiration_time
 from django.core.mail import send_mail
 from django.conf import settings
@@ -143,14 +143,16 @@ class SignupView(GenericAPIView):
 
 # ----------app config view----------
 class AppConfigView(GenericAPIView):
+    serializer_class = AppConfigSerializer
     authentication_classes = []
     permission_classes = [AllowAny]
 
     def get(self, request):
-        return Response({
-            "version": "12.12.3",
-            "verify_email": True
-        })
+        config = AppConfig.objects.first()
+        if not config:
+            config = AppConfig.objects.create()
+        serializer = self.get_serializer(config)
+        return Response(serializer.data)
 
 
 # ----------resend verification code view----------
@@ -594,4 +596,37 @@ class AdminUserDetailView(UserDetailView):
             return Response({'message': 'admin user not found'}, status=404)
         
         serializer = self.get_serializer(user)
+        return Response(serializer.data)
+
+
+# ----------admin business setup view (GET)----------
+class AdminBusinessSetupView(GenericAPIView):
+    serializer_class = AppConfigSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != 'admin':
+            return Response({'message': 'only admins can access this'}, status=403)
+        config = AppConfig.objects.first()
+        if not config:
+            config = AppConfig.objects.create()
+        serializer = self.get_serializer(config)
+        return Response(serializer.data)
+
+
+# ----------admin business setup update view (POST)----------
+class AdminBusinessSetupUpdateView(GenericAPIView):
+    serializer_class = AppConfigSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if request.user.role != 'admin':
+            return Response({'message': 'only admins can access this'}, status=403)
+        config = AppConfig.objects.first()
+        if not config:
+            config = AppConfig.objects.create()
+        serializer = self.get_serializer(config, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(format_serializer_errors(serializer.errors), status=400)
+        serializer.save()
         return Response(serializer.data)

@@ -99,3 +99,22 @@ class VarificationCode(models.Model):
     expired_at = models.DateTimeField()
     secret_key = models.UUIDField(null=True, blank=True)
 
+
+# -----------app config model----------
+class AppConfig(models.Model):
+    version = models.CharField(max_length=20, default='12.12.3')
+    verify_email = models.BooleanField(default=True)
+    maintenance_mode = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"AppConfig v{self.version}"
+
+    class Meta:
+        verbose_name = 'App Config'
+
+    def save(self, *args, **kwargs):
+        # Ensure only one instance exists (singleton)
+        if not self.pk and AppConfig.objects.exists():
+            existing = AppConfig.objects.first()
+            self.pk = existing.pk
+        super().save(*args, **kwargs)

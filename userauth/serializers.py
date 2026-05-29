@@ -162,3 +162,11 @@ class AdminSignInSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
     username = serializers.CharField(required=False)
     password = serializers.CharField(write_only=True)
+
+
+# -----------app config serializer----------
+class AppConfigSerializer(serializers.ModelSerializer):
+    class Meta:
+        from .models import AppConfig as AppConfigModel
+        model = AppConfigModel
+        fields = ['version', 'verify_email', 'maintenance_mode']
